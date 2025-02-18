@@ -1,0 +1,181 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Melisa & Arel: İçsel Yolculuk</title>
+    <style>
+        body {
+            font-family: 'Merriweather', serif;
+            text-align: center;
+            background-color: #0d0d0d;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        .step {
+            display: none;
+        }
+        .active {
+            display: block;
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        button {
+            background-color: #2c2c2c;
+            color: #e0e0e0;
+            border: 1px solid #444;
+            padding: 15px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #444;
+        }
+        .choices button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+        }
+        #step10.fade-out {
+            animation: fadeOut 30s ease-in-out forwards;
+        }
+
+        /* Kırık Ayna Efekti */
+        #video {
+            width: 100%;
+            height: auto;
+            background-image: url('https://raw.githubusercontent.com/Melisaarel/ayna/main/pngwing.com.png'); /* Kırık aynanın görseli */
+            background-size: cover;
+            filter: grayscale(100%) contrast(120%) brightness(80%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="step1" class="step active">
+            <h2>Yolculuğun Başlıyor</h2>
+            <p>"Bu yolculuk sana ayna tutacak. Soruları yanıtlamaya hazır mısın?"</p>
+            <button onclick="startQuestions()">Başla</button>
+        </div>
+        
+        <div id="question-container" class="step">
+            <h2 id="question-text"></h2>
+            <div class="choices" id="choices-container"></div>
+        </div>
+        
+        <div id="step9" class="step">
+            <h2>Arel Şihab </h2>
+            <p id="arelMessage"></p>
+            <button onclick="nextStep(10)">Devam Et</button>
+        </div>
+        
+        <div id="step10" class="step">
+            <h2>Aynadaki Sen </h2>
+            <p>Telefonunun kamerasını aç ve aynada özgürce hislerinin akmasına izin ver .</p>
+            <video id="video" autoplay></video>
+            <p>"Bu yolculuk sadece bir başlangıç. Kendi hikayeni paylaş: #Melisa_Arel"</p>
+            <button onclick="restart()">Yolculuğu Tekrar Et</button>
+        </div>
+    </div>
+    
+    <script>
+        const questions = [
+            { q: "1-Hayatında şu an eksikliğini derinden hissettiğin, ruhuna en çok yabancı gelen şey nedir? ", choices: ["Bağışlama", "Tutku", "Özgüven", "Huzur"] },
+            { q: "2-Kendini en çok nerede kaybettiğini hissediyorsun?", choices: ["Geçmişte", "Toplumsal beklentilerde", "Başarısızlık korkusunda", "Hayallerini unutarak"] },
+            { q: "3-Geçmişindeki hangi duygu, sende en kalıcı izleri bırakmakta?", choices: ["Öfke", "Korku", "Üzüntü", "Yalnızlık"] },
+            { q: "4-Hayatında bir kapıyı aralama şansın olsa, hangi kapının ardındaki bilinmezi keşfetmeyi seçerdin?", choices: ["Affetme Kapısı", "Kendi Gücümü Bulma Kapısı", "Bilinmeyene Cesaret Kapısı", "Kaybolan Tutkular Kapısı"] },
+            { q: "5-Kendi iç sesin sana en çok ne söylüyor?", choices: ["Harekete geç", "Daha çok sev", "Affet", "Kendini keşfet"] },
+            { q: "6-En büyük korkun ne?", choices: ["Başarısız olmak", "Sevilmemek", "Kendi potansiyelimi kullanamamak", "Yalnız kalmak"] },
+            { q: "7-Hayatta neye en çok ihtiyaç duyuyorsun?", choices: ["Huzur", "Cesaret", "İlham", "Bağlılık"] }
+        ];
+        
+        let answers = [];
+        let currentStep = 0;
+
+        function startQuestions() {
+            currentStep = 0;
+            answers = [];
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            if (currentStep < questions.length) {
+                document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+                document.getElementById('question-container').classList.add('active');
+                document.getElementById('question-text').innerText = questions[currentStep].q;
+                let choicesContainer = document.getElementById('choices-container');
+                choicesContainer.innerHTML = '';
+                questions[currentStep].choices.forEach(choice => {
+                    let btn = document.createElement('button');
+                    btn.innerText = choice;
+                    btn.onclick = () => storeAnswer(choice);
+                    choicesContainer.appendChild(btn);
+                });
+            } else {
+                analyzeAnswers();
+            }
+        }
+
+        function storeAnswer(choice) {
+            answers.push(choice);
+            currentStep++;
+            nextQuestion();
+        }
+
+        function analyzeAnswers() {
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            document.getElementById('step9').classList.add('active');
+            document.getElementById('arelMessage').innerText = generateArelMessage(answers);
+        }
+
+        function generateArelMessage(answers) {
+            const messages = {
+                "Bağışlama":"Affetmek, ruhunun zincirlerinden kurtulmasıdır. Geçmişin ağırlığını taşımak, seni yalnızca hapseder; ama affetmek, seni özgür kılar. İçindeki kırgınlıkları serbest bırakmak, sadece karşındaki kişiyi değil, en çok kendini özgürleştirir. Affetmek, yüreğini hafifletir, seni yeniden doğurur. Unutma, affetmek, geçmişi değil, senin kendi huzurunu seçmendir. *** Baba, seni affediyorum,diye fısıldadı kendi kendine, önce sessizce, sonra derin bir inançla. Her tekrarda, sanki içinde yıllardır taş gibi biriken ağırlık hafifliyordu.(Melisa) *** ",
+                "Tutku": " Tutkularını takip et, çünkü onlar seni gerçekten kim olduğunla buluşturur. Dışsal hedefler önemli olsa da, içindeki derin arzu ve motivasyonları dinlemek, seni hayatta doğru yolda tutar. Zorluklar karşısında bile, tutkuların seni ayakta tutacak ve seni doğru yere götürecektir. Kendi yolunu, içindeki tutkularla keşfet. *** Sanat bir risk değil midir zaten? Her fırça darbesi, her renk seçimi, bir duyguya dokunma çabasıdır. İnsanlara güzellik göstermek de bir sanatçının görevidir.(Arel) ***",
+                "Özgüven": " Özgüven, içindeki gücün en saf yansımasıdır. Kendine duyduğun inanç, dış dünyaya nasıl var olduğunu belirler. Korkularını ve şüphelerini bir kenara bırakıp, ruhunun derinliklerinden gelen gücü kabullenmelisin. Her adımda, içindeki kudreti fark ederek ilerle, çünkü özgüven sadece bir tavır değil, varlığının özüyle dünyaya sunduğun en güçlü mesajdır. Kendine güven, çünkü seni en iyi sen anlayabilir ve yönlendirebilirsin. *** Elimi tut, dedi çocuk, Hiç merak etme, ben seni korurum. Melisa, çocuğun özgüven dolu tavrına şaşırsa da bu durumu çok tatlı buldu.​(Efe) ***",
+                "Huzur": " Huzuru dışarıda arama, çünkü gerçek huzur içindedir. Dünyanın gürültüsünden uzaklaşıp, kendi iç yolculuğuna çıktığında, aradığın dinginliği bulabilirsin. Düşüncelerinin karmaşasından sıyrıl ve ruhunun derinliklerinde sessizliğe kulak ver. Huzur, seni bekleyen bir dış dünya değil, senin içinde var olan bir evrendir. Onu keşfetmek, kalbinin sakinliğine adım atmaktır. *** Evet, tam da öyle. Şu anda, geçmişin ağırlığına ve geleceğin belirsizliğine ihtiyaç yok. Sadece varız. Şimdi ve burada. Huzur da tam burada saklı.(Arel) ***",
+                "Korku": " Korkuların seni tanımlamaz; onlar yalnızca geçici bir yankıdır, içindeki gücün gerisinde duran gölgeler. Korkularına teslim olma, çünkü onlar senin özün değildir. Onların ötesinde, cesaretin ve direncin seni bekliyor. Korkularının sesi seni yıldırmasın; senin gerçek kimliğin, onlara karşı durduğunda şekillenir. Korkularını aşmak, kendini bulmak ve en güçlü halini ortaya koymak, en derin özgürlüğün başlangıcıdır. *** Bunlar sadece sana söylenen çirkin sözler. Onlara inanmadığın sürece seni tutamazlar. Onların bir kökü yok. (Efe)***",
+                "Geçmiş": " Geçmişin yükünü omuzlarından at, çünkü o sadece seni geride tutan bir anıdır. Şimdiye odaklan; her an, bir yenilik, bir başlangıçtır. Zihnini geçmişin gölgelerinden arındır, kalbini bugünün ışığıyla doldur. Her nefes, yeni bir fırsattır; her adım, yeniden doğmanın izidir. Geçmişe takılı kalma, çünkü hayatın gerçek zenginliği, içinde bulunduğun anda ve o anın sunduğu güzelliklerde saklıdır. *** Sergide gördüğün her şey, iç dünyanın bir yansımasıydı. İlk gün karanlık ve belirsizlikle doluyken, zamanla bu soyut formlar berraklığa ve huzura dönüştü.(Arel) ***",
+                "Cesaret": " Kendi yolunu çiz, çünkü hiçbir harita seni tam olarak senin olduğun yere götüremez. İçindeki sesin, seni yalnızca senin yürüyebileceğin bir yola yönlendirir. Başkalarının izlediği patikalarda kaybolma; kendi adımlarınla, kendi izlerini bırak. Yolun zorlu olabilir, ama her engel, seni daha güçlü kılacak bir ders taşır. Kendi rotanı belirlemek, kendi hikayenin kahramanı olmak demektir. Unutma, en büyük keşifler, kendi yolunda kaybolduğunda başlar. ***Sen yolculuğunu tamamladın Melisa. Artık sen kendi ışığınsın. Benim varlığım gereksizleşti. (Arel) ***"
+            };
+            return messages[answers[0]] || "Kendi yolunu keşfet.";
+        }
+
+        function nextStep(step) {
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
+            if (step === 10) {
+                startCamera();
+            }
+        }
+
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    const video = document.getElementById('video');
+                    video.srcObject = stream;
+                })
+                .catch(err => {
+                    console.error("Kamera açılırken hata oluştu: ", err);
+                });
+        }
+
+        function restart() {
+            document.location.reload();
+        }
+    </script>
+</body>
+</html>               
